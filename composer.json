@@ -1,0 +1,21 @@
+{
+    "name": "cognitive/filesystem",
+    "description": "Library to work with filesystem like Composer\\Util\\Filesystem but lite and separate",
+    "type": "library",
+    "homepage": "http://www.cognitive.ru/",
+    "authors": [
+        {
+            "name": "Cognitive",
+            "email": "info@cognitive.ru"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gognitive\\FileSystem\\": "src/",
+            "Gognitive\\FileSystem\\Tests\\": "tests/"
+        }
+    }
+}
