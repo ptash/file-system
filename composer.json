@@ -1,6 +1,6 @@
 {
-    "name": "cognitive/filesystem",
-    "description": "Library to work with filesystem like Composer\\Util\\Filesystem but lite and separate",
+    "name": "cognitive/file-system",
+    "description": "Lite library to work with file system like Composer\\Util\\Filesystem but separate and so lite",
     "type": "library",
     "homepage": "http://www.cognitive.ru/",
     "authors": [
