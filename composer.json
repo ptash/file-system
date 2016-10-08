@@ -14,8 +14,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Gognitive\\FileSystem\\": "src/",
-            "Gognitive\\FileSystem\\Tests\\": "tests/"
+            "Cognitive\\FileSystem\\": "src/",
+            "Cognitive\\FileSystem\\Tests\\": "tests/"
         }
     }
 }
