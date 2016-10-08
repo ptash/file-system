@@ -33,5 +33,10 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(true, is_file($fileName));
         $fileSystem->emptyDirectory($dirName);
         $this->assertNotEquals(true, is_file($fileName));
+
+        mkdir($fileName);
+        $this->assertEquals(true, is_dir($fileName));
+        $fileSystem->emptyDirectory($dirName);
+        $this->assertNotEquals(true, is_dir($fileName));
     }
 }
