@@ -41,9 +41,9 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
 
         rmdir($dirName);
         $fileSystem->emptyDirectory($dirName, false);
-        $this->assertNotEquals(true, is_dir($fileName));
+        $this->assertNotEquals(true, is_dir($dirName));
 
         $fileSystem->emptyDirectory($dirName);
-        $this->assertEquals(true, is_dir($fileName));
+        $this->assertEquals(true, is_dir($dirName));
     }
 }
