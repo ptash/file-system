@@ -9,10 +9,12 @@ php:
 
 before_script:
   - travis_retry composer self-update
+  - travis_retry composer require --no-update satooshi/php-coveralls '~1.0'
+  - travis_retry composer require --no-update sensiolabs/security-checker:dev-master
   - travis_retry composer install
 
 script:
-  - phpunit --coverage-text --coverage-clover=coverage.clover
+  - phpunit --coverage-text --coverage-clover build/logs/clover.xml
 
-after_script:
-  - if [[ $TRAVIS_PHP_VERSION != 'hhvm' && $TRAVIS_PHP_VERSION != '7.0' ]]; then php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover; fi
+after_success:
+  - travis_retry php vendor/bin/coveralls
