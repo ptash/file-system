@@ -11,6 +11,7 @@ namespace Cognitive\FileSystem;
  */
 class FileSystem
 {
+    const MAKE_DIR_MODE_DEFAULT = 0777;
     /**
      * Empty directory content.
      *
@@ -22,7 +23,7 @@ class FileSystem
     public function emptyDirectory($dir, $ensureDirectoryExists = true)
     {
         if (!is_dir($dir) && $ensureDirectoryExists) {
-            mkdir($dir);
+            mkdir($dir, self::MAKE_DIR_MODE_DEFAULT, true);
         }
 
         if (is_dir($dir)) {
