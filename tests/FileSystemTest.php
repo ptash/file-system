@@ -48,6 +48,36 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Testing normalizePath.
+     *
+     * @return void
+     */
+    public function testNormalizePath()
+    {
+        $fileSystem = new FileSystem();
+        $fileSystem->setDirectorySeparator('/');
+        $checkVals = array(
+            'C:\rrr' => 'C:/rrr',
+            '/fff/..\\ddd' => '/ddd',
+            'http://dddd\\dddd/rrr.gif' => 'http://dddd/dddd/rrr.gif'
+        );
+        foreach ($checkVals as $key => $val) {
+            $res = $fileSystem->normalizePath($key);
+            $this->assertEquals($res, $val);
+        }
+
+        $fileSystem->setDirectorySeparator('\\');
+        $checkVals = array(
+            'C:\rrr' => 'C:\\rrr',
+            '/fff/../.\\ddd' => '\\ddd'
+        );
+        foreach ($checkVals as $key => $val) {
+            $res = $fileSystem->normalizePath($key);
+            $this->assertEquals($res, $val);
+        }
+    }
+
+    /**
      * Testing relativeSymlink.
      *
      * @return void
