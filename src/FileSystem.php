@@ -32,8 +32,14 @@ class FileSystem
             foreach ($files as $file) {
                 if ($file->isDir()) {
                     rmdir($file->getRealPath());
-                } else {
+                } elseif ($file->isFile()) {
                     unlink($file->getRealPath());
+                } elseif ($file->isLink()) {
+                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                        rmdir($file->getPathName());
+                    } else {
+                        unlink($file->getPathName());
+                    }
                 }
             }
         }
@@ -137,35 +143,35 @@ class FileSystem
         }
 
         if (dirname($from) === dirname($to)) {
-            return './'.basename($to);
+            $shortestPath = './'.basename($to);
+        } else {
+            $commonPath = $to;
+            while (strpos($from . '/', $commonPath . '/') !== 0 &&
+                '/' !== $commonPath &&
+                !preg_match('{^[a-z]:/?$}i', $commonPath)
+            ) {
+                $commonPath = strtr(dirname($commonPath), '\\', '/');
+            }
+
+            if (0 !== strpos($from, $commonPath) || '/' === $commonPath) {
+                $shortestPath = $to;
+            } else {
+                $commonPath = rtrim($commonPath, '/') . '/';
+                $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), '/');
+                $commonPathCode = str_repeat('../', $sourcePathDepth);
+
+                $shortestPath = ($commonPathCode . substr($to, strlen($commonPath))) ?: './';
+            }
         }
-
-        $commonPath = $to;
-        while (strpos($from.'/', $commonPath.'/') !== 0 &&
-            '/' !== $commonPath &&
-            !preg_match('{^[a-z]:/?$}i', $commonPath)
-        ) {
-            $commonPath = strtr(dirname($commonPath), '\\', '/');
-        }
-
-        if (0 !== strpos($from, $commonPath) || '/' === $commonPath) {
-            return $to;
-        }
-
-        $commonPath = rtrim($commonPath, '/') . '/';
-        $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), '/');
-        $commonPathCode = str_repeat('../', $sourcePathDepth);
-
-        $shortestPath = strtr(($commonPathCode . substr($to, strlen($commonPath))) ?: './', '/', DIRECTORY_SEPARATOR);
-
+        $shortestPath = strtr($shortestPath, '/', DIRECTORY_SEPARATOR);
         return $shortestPath;
     }
 
     /**
      * Create relative symlink under unix and windows.
      *
-     * @param string $target Path to new file/directory which links to $link.
-     * @param string $link   Path to existing.
+     * @param string $target Path to existing.
+     * @param string $link   Path to new file/directory which links to $target.
      *
      * @return bool
      * @since 0.0.3 introduced.
@@ -174,18 +180,14 @@ class FileSystem
     {
         $cwd = getcwd();
 
-        $relativePath = $this->findShortestPath($link, $target);
-        chdir(dirname($link));
+        $relativePath = $this->findShortestPath($target, $link);
+        chdir(dirname($target));
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            if (PHP_OS === 'WINXP') {
-                $command = 'junction';
-            } else {
-                $command = 'mklink /d';
-            }
-            exec("$command $relativePath $link", $output, $returnVar);
+            $command = 'mklink /d';
+            exec("$command $relativePath $target", $output, $returnVar);
             $result = $returnVar > 0 ? false : true;
         } else {
-            $result = symlink($relativePath, $link);
+            $result = symlink($target, $relativePath);
         }
         chdir($cwd);
         return (bool)$result;

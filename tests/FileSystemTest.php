@@ -46,4 +46,23 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         $fileSystem->emptyDirectory($dirName);
         $this->assertEquals(true, is_dir($dirName));
     }
+
+    /**
+     * Testing relativeSymlink.
+     *
+     * @return void
+     */
+    public function testRelativeSymlink()
+    {
+        $fileSystem = new FileSystem();
+        $dirName = \sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fileSystemTmpDir';
+        $fileName = $dirName . DIRECTORY_SEPARATOR . 'testFile';
+        $newLinkFileName = $dirName . DIRECTORY_SEPARATOR . 'testLink';
+
+        $fileSystem->emptyDirectory($dirName);
+        file_put_contents($fileName, '');
+
+        $fileSystem->relativeSymlink($fileName, $newLinkFileName);
+        $this->assertEquals(true, is_file($newLinkFileName), 'Check create link');
+    }
 }
