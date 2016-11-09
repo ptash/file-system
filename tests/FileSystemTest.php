@@ -46,4 +46,53 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         $fileSystem->emptyDirectory($dirName);
         $this->assertEquals(true, is_dir($dirName));
     }
+
+    /**
+     * Testing normalizePath.
+     *
+     * @return void
+     */
+    public function testNormalizePath()
+    {
+        $fileSystem = new FileSystem();
+        $fileSystem->setDirectorySeparator('/');
+        $checkVals = array(
+            'C:\rrr' => 'C:/rrr',
+            '/fff/..\\ddd' => '/ddd',
+            'http://dddd\\dddd/rrr.gif' => 'http://dddd/dddd/rrr.gif'
+        );
+        foreach ($checkVals as $key => $val) {
+            $res = $fileSystem->normalizePath($key);
+            $this->assertEquals($res, $val);
+        }
+
+        $fileSystem->setDirectorySeparator('\\');
+        $checkVals = array(
+            'C:\rrr' => 'C:\\rrr',
+            '/fff/../.\\ddd' => '\\ddd'
+        );
+        foreach ($checkVals as $key => $val) {
+            $res = $fileSystem->normalizePath($key);
+            $this->assertEquals($res, $val);
+        }
+    }
+
+    /**
+     * Testing relativeSymlink.
+     *
+     * @return void
+     */
+    public function testRelativeSymlink()
+    {
+        $fileSystem = new FileSystem();
+        $dirName = \sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fileSystemTmpDir';
+        $fileName = $dirName . DIRECTORY_SEPARATOR . 'testFile';
+        $newLinkFileName = $dirName . DIRECTORY_SEPARATOR . 'testLink';
+
+        $fileSystem->emptyDirectory($dirName);
+        file_put_contents($fileName, '');
+
+        $fileSystem->relativeSymlink($fileName, $newLinkFileName);
+        $this->assertEquals(true, is_file($newLinkFileName), 'Check create link');
+    }
 }
