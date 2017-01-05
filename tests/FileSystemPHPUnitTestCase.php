@@ -12,6 +12,7 @@ use Cognitive\FileSystem\FileSystem;
 
 /**
  * Class FileSystemPHPUnitTestCase
+ * @since 0.0.4 introduced.
  */
 class FileSystemPHPUnitTestCase extends \PHPUnit_Framework_TestCase
 {
