@@ -26,12 +26,17 @@ class FileSystemPHPUnitTestCase extends \PHPUnit_Framework_TestCase
     /**
      * ReleaseCheckerTest constructor.
      *
+     * @param  string $name     See @see PHPUnit_Framework_TestCase.
+     * @param  array  $data     See @see PHPUnit_Framework_TestCase.
+     * @param  string $dataName See @see PHPUnit_Framework_TestCase.
+     *
      * @return void
      */
-    public function __construct()
+    public function __construct($name = null, array $data = array(), $dataName = '')
     {
         $this->fileSystem = new FileSystem();
         $this->dirTmp = \sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fileSystemTmp';
+        parent::__construct($name, $data, $dataName);
     }
 
     /**

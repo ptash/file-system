@@ -55,31 +55,46 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
     /**
      * Testing normalizePath.
      *
+     * @param string $dirSeparator Separator.
+     * @param string $checkValues  Check values as array('somePath' => 'normalizePath').
+     *
      * @return void
+     *
+     * @dataProvider getProviderTestCreateLinkToJSDirs
      */
-    public function testNormalizePath()
+    public function testNormalizePath($dirSeparator, $checkValues)
     {
         $fileSystem = new FileSystem();
-        $fileSystem->setDirectorySeparator('/');
-        $checkVals = array(
-            'C:\rrr' => 'C:/rrr',
-            '/fff/..\\ddd' => '/ddd',
-            'http://dddd\\dddd/rrr.gif' => 'http://dddd/dddd/rrr.gif'
-        );
-        foreach ($checkVals as $key => $val) {
+        $fileSystem->setDirectorySeparator($dirSeparator);
+        foreach ($checkValues as $key => $val) {
             $res = $fileSystem->normalizePath($key);
             $this->assertEquals($res, $val);
         }
+    }
 
-        $fileSystem->setDirectorySeparator('\\');
-        $checkVals = array(
-            'C:\rrr' => 'C:\\rrr',
-            '/fff/../.\\ddd' => '\\ddd'
+    /**
+     * Data provider for testCreateLinkToJSDirs test.
+     * @return array
+     */
+    public function getProviderTestCreateLinkToJSDirs()
+    {
+        return array(
+            array(
+                '/',
+                array(
+                    'C:\rrr' => 'C:/rrr',
+                    '/fff/..\\ddd' => '/ddd',
+                    'http://dddd\\dddd/rrr.gif' => 'http://dddd/dddd/rrr.gif'
+                )
+            ),
+            array(
+                '\\',
+                array(
+                    'C:\rrr' => 'C:\\rrr',
+                    '/fff/../.\\ddd' => '\\ddd'
+                )
+            )
         );
-        foreach ($checkVals as $key => $val) {
-            $res = $fileSystem->normalizePath($key);
-            $this->assertEquals($res, $val);
-        }
     }
 
     /**
