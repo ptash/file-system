@@ -49,6 +49,7 @@ class FileSystem
             $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($files as $file) {
                 if ($file->isDir()) {
+                    $this->emptyDirectory($file->getRealPath());
                     rmdir($file->getRealPath());
                 } elseif ($file->isFile()) {
                     unlink($file->getRealPath());

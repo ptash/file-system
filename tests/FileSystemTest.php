@@ -39,6 +39,11 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         $fileSystem->emptyDirectory($dirName);
         $this->assertNotEquals(true, is_dir($fileName));
 
+        mkdir($fileName);
+        mkdir($fileName . DIRECTORY_SEPARATOR . 'testRecursive');
+        $fileSystem->emptyDirectory($dirName);
+        $this->assertNotEquals(true, is_dir($fileName), 'Check recursive delete content');
+
         rmdir($dirName);
         $fileSystem->emptyDirectory($dirName, false);
         $this->assertNotEquals(true, is_dir($dirName));
