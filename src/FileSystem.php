@@ -48,17 +48,16 @@ class FileSystem
             $it = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
             $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($files as $file) {
-                if ($file->isDir()) {
-                    $this->emptyDirectory($file->getRealPath());
-                    rmdir($file->getRealPath());
-                } elseif ($file->isFile()) {
-                    unlink($file->getRealPath());
-                } elseif ($file->isLink()) {
+                if ($file->isLink()) {
                     if ($this->isOSWindows()) {
                         rmdir($file->getPathName());
                     } else {
                         unlink($file->getPathName());
                     }
+                } elseif ($file->isDir()) {
+                    rmdir($file->getRealPath());
+                } elseif ($file->isFile()) {
+                    unlink($file->getRealPath());
                 }
             }
         }
@@ -228,14 +227,14 @@ class FileSystem
     {
         $cwd = getcwd();
 
-        $relativePath = $this->findShortestPath($target, $link);
+        $relativePath = $this->findShortestPath($link, $target);
         chdir(dirname($target));
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
             exec("$command $relativePath $target", $output, $returnVar);
             $result = $returnVar > 0 ? false : true;
         } else {
-            $result = symlink($target, $relativePath);
+            $result = symlink($relativePath, $link);
         }
         chdir($cwd);
         return (bool)$result;
