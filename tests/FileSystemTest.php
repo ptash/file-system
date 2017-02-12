@@ -38,9 +38,28 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(true, is_dir($fileName));
         $fileSystem->emptyDirectory($dirName);
         $this->assertNotEquals(true, is_dir($fileName));
-
+        
         mkdir($fileName);
         mkdir($fileName . DIRECTORY_SEPARATOR . 'testRecursive');
+        mkdir($fileName . DIRECTORY_SEPARATOR . 'testRecursive' . DIRECTORY_SEPARATOR . 'testRecursive2');
+        $fileSystem->emptyDirectory($dirName);
+        $this->assertNotEquals(true, is_dir($fileName), 'Check recursive delete content');
+
+        mkdir($fileName);
+        mkdir($fileName . DIRECTORY_SEPARATOR . 'testD');
+        mkdir($fileName . DIRECTORY_SEPARATOR . 'testD2');
+        file_put_contents(implode(DIRECTORY_SEPARATOR, array($fileName, 'testD2', 'file')), '');
+        mkdir($fileName . DIRECTORY_SEPARATOR . 'testD3');
+        mkdir(implode(DIRECTORY_SEPARATOR, array($fileName, 'testD3', 'testD3D1')));
+        file_put_contents(implode(DIRECTORY_SEPARATOR, array($fileName, 'testD3', 'testD3D1', 'file')), '');
+        $fileSystem->relativeSymlink(
+            implode(DIRECTORY_SEPARATOR, array($fileName, 'testD3', 'testD3D1')),
+            implode(DIRECTORY_SEPARATOR, array($fileName, 'testD', 'link'))
+        );
+        $fileSystem->relativeSymlink(
+            $fileName . DIRECTORY_SEPARATOR . 'testD2',
+            implode(DIRECTORY_SEPARATOR, array($fileName, 'testD3', 'testD3D1', 'link2'))
+        );
         $fileSystem->emptyDirectory($dirName);
         $this->assertNotEquals(true, is_dir($fileName), 'Check recursive delete content');
 
@@ -105,7 +124,7 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
     public function testRelativeSymlink()
     {
         $fileSystem = new FileSystem();
-        $dirName = \sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fileSystemTmpDir';
+        $dirName = implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'fileSystemTmpDir', 'd1']);
         $fileName = $dirName . DIRECTORY_SEPARATOR . 'testFile';
         $newLinkFileName = $dirName . DIRECTORY_SEPARATOR . 'testLink';
 
@@ -114,5 +133,15 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
 
         $fileSystem->relativeSymlink($fileName, $newLinkFileName);
         $this->assertEquals(true, is_file($newLinkFileName), 'Check create link');
+
+        $dirNameNew = implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'fileSystemTmpDir', 'd2']);
+        $fileSystem->emptyDirectory($dirNameNew);
+        rmdir($dirNameNew);
+        rename($dirName, $dirNameNew);
+        $this->assertEquals(
+            true,
+            is_file(implode(DIRECTORY_SEPARATOR, [$dirNameNew, 'testLink'])),
+            'Check relative link after move'
+        );
     }
 }
