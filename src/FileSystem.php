@@ -48,18 +48,30 @@ class FileSystem
             $it = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
             $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($files as $file) {
-                if ($file->isLink()) {
-                    if ($this->isOSWindows()) {
-                        rmdir($file->getPathName());
-                    } else {
-                        unlink($file->getPathName());
-                    }
-                } elseif ($file->isDir()) {
-                    rmdir($file->getRealPath());
-                } elseif ($file->isFile()) {
-                    unlink($file->getRealPath());
-                }
+                $this->deleteByPath($file->getPathName());
             }
+        }
+    }
+
+    /**
+     * Delete file or directory or link.
+     *
+     * @param string $file Path to file or directory or link.
+     *
+     * @return void
+     */
+    public function deleteByPath($file)
+    {
+        if (is_link($file)) {
+            if ($this->isOSWindows()) {
+                rmdir($file);
+            } else {
+                unlink($file);
+            }
+        } elseif (is_dir($file)) {
+            rmdir($file);
+        } elseif (is_file($file)) {
+            unlink($file);
         }
     }
 
