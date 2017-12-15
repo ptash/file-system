@@ -238,16 +238,16 @@ class FileSystem
     public function relativeSymlink($target, $link)
     {
         $cwd = getcwd();
-
+        $nameLink = basename($link);
         $relativePath = $this->findShortestPath($link, $target);
-        chdir(dirname($link));
+        chdir(dirname($target));
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
-            exec("$command $link $relativePath", $output, $returnVar);
+            exec("$command $nameLink $relativePath", $output, $returnVar);
             $result = $returnVar > 0 ? false : true;
         } else {
             echo "$relativePath <- $link\n";
-            $result = symlink($relativePath, $link);
+            $result = symlink($relativePath, $nameLink);
         }
         chdir($cwd);
         return (bool)$result;
