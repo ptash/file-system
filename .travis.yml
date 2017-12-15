@@ -10,7 +10,6 @@ php:
 before_script:
   - travis_retry composer self-update
   - travis_retry composer require --no-update satooshi/php-coveralls '~1.0'
-  - travis_retry composer require --no-update sensiolabs/security-checker:dev-master
   - travis_retry composer install
 
 script:
