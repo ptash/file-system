@@ -132,15 +132,15 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
         file_put_contents($fileName, '');
 
         $fileSystem->relativeSymlink($fileName, $newLinkFileName);
-        $this->assertTrue(is_file($newLinkFileName) || is_link($newLinkFileName), 'Check create link');
+        $this->assertEquals(true, is_file($newLinkFileName), 'Check create link');
 
         $dirNameNew = implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'fileSystemTmpDir', 'd2']);
         $fileSystem->emptyDirectory($dirNameNew);
         rmdir($dirNameNew);
         rename($dirName, $dirNameNew);
-        $linkAfterMove = implode(DIRECTORY_SEPARATOR, [$dirNameNew, 'testLink']);
-        $this->assertTrue(
-            is_file($linkAfterMove) || is_link($linkAfterMove),
+        $this->assertEquals(
+            true,
+            is_file(implode(DIRECTORY_SEPARATOR, [$dirNameNew, 'testLink'])),
             'Check relative link after move'
         );
     }
@@ -153,24 +153,13 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
     public function testRelativeSymlinkForDir()
     {
         $fileSystem = new FileSystem();
-        $dirName = implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'fileSystemTmpDir', 'd1']);
-        $fileName = $dirName . DIRECTORY_SEPARATOR . 'testFile';
-        $newLinkFileName = $dirName . DIRECTORY_SEPARATOR . 'testLink';
-
-        $fileSystem->emptyDirectory($dirName);
-        file_put_contents($fileName, '');
-        $relativeNameLink = $fileSystem->findShortestPath(getcwd(), $newLinkFileName);
-        $fileSystem->relativeSymlink($fileName, $relativeNameLink);
-        $this->assertTrue(is_file($newLinkFileName) || is_link($newLinkFileName), 'Check create link');
-
-        $dirNameNew = implode(DIRECTORY_SEPARATOR, [\sys_get_temp_dir(), 'fileSystemTmpDir', 'd2']);
-        $fileSystem->emptyDirectory($dirNameNew);
-        rmdir($dirNameNew);
-        rename($dirName, $dirNameNew);
-        $linkAfterMove = implode(DIRECTORY_SEPARATOR, [$dirNameNew, 'testLink']);
-        $this->assertTrue(
-            is_file($linkAfterMove) || is_link($linkAfterMove),
-            'Check relative link after move'
-        );
+        $dirTest = sys_get_temp_dir() . DIRECTORY_SEPARATOR . __FUNCTION__;
+        $linkDir = $dirTest . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR;
+        $fileSystem->ensureDirectoryExists($linkDir);
+        $link = $fileSystem->findShortestPath($dirTest, $linkDir . 'link');
+        $fileSystem->relativeSymlink($dirTest, $link);
+        $this->assertTrue(file_exists($linkDir));
+        $fileSystem->emptyDirectory($dirTest);
+        $fileSystem->deleteByPath($dirTest);
     }
 }

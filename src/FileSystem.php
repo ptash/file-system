@@ -218,9 +218,8 @@ class FileSystem
                 $commonPath = rtrim($commonPath, $this->dirSeparator) . $this->dirSeparator;
                 $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), $this->dirSeparator);
                 $commonPathCode = str_repeat(self::DIRECTORY_UP . $this->dirSeparator, $sourcePathDepth);
-
-                $shortestPath = ($commonPathCode . substr($to, strlen($commonPath))) ?
-                    : self::DIRECTORY_CURRENT . $this->dirSeparator;
+                $commonPathWithCode = $commonPathCode . substr($to, strlen($commonPath));
+                $shortestPath = $this->getCurrentDirectoryForPath() . $commonPathWithCode;
             }
         }
         return $shortestPath;
@@ -238,16 +237,20 @@ class FileSystem
     public function relativeSymlink($target, $link)
     {
         $cwd = getcwd();
-        $nameLink = basename($link);
+        if (!$this->isAbsolutePath($link) && $this->isAbsolutePath($target)) {
+            $link = preg_replace("#^\." . $this->dirSeparator . "#", '', $link);
+            $link = $target . $this->dirSeparator . $link;
+        }
         $relativePath = $this->findShortestPath($link, $target);
         chdir(dirname($target));
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
-            exec("$command $nameLink $relativePath", $output, $returnVar);
-            $result = $returnVar > 0 ? false : true;
+            echo "$relativePath <- $link\n";
+            exec("$command $link $relativePath", $output, $returnVar);
+            $result = ($returnVar == 0);
         } else {
             echo "$relativePath <- $link\n";
-            $result = symlink($relativePath, $nameLink);
+            $result = symlink($relativePath, $link);
         }
         chdir($cwd);
         return (bool)$result;
@@ -261,5 +264,15 @@ class FileSystem
     private function isOSWindows()
     {
         return strtoupper(substr(PHP_OS, 0, strlen('WIN'))) === 'WIN';
+    }
+
+    /**
+     * Get current directory for path.
+     *
+     * @return string
+     */
+    private function getCurrentDirectoryForPath()
+    {
+        return self::DIRECTORY_CURRENT . $this->dirSeparator;
     }
 }
