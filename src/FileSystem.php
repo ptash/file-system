@@ -237,20 +237,21 @@ class FileSystem
     public function relativeSymlink($target, $link)
     {
         $cwd = getcwd();
+        $linkPath = $link;
         if (!$this->isAbsolutePath($link) && $this->isAbsolutePath($target)) {
-            $link = preg_replace("#^\." . $this->dirSeparator . "#", '', $link);
-            $link = $target . $this->dirSeparator . $link;
+            $linkPath = preg_replace("#^\." . $this->dirSeparator . "#", '', $link);
+            $linkPath = $target . $this->dirSeparator . $linkPath;
         }
-        $relativePath = $this->findShortestPath($link, $target);
+        $relativePath = $this->findShortestPath($linkPath, $target);
         chdir(dirname($target));
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
-            echo "$relativePath <- $link\n";
-            exec("$command $link $relativePath", $output, $returnVar);
+            echo "$relativePath <- $linkPath\n";
+            exec("$command $linkPath $relativePath", $output, $returnVar);
             $result = ($returnVar == 0);
         } else {
-            echo "$relativePath <- $link\n";
-            $result = symlink($relativePath, $link);
+            echo "$relativePath <- $linkPath\n";
+            $result = symlink($relativePath, $linkPath);
         }
         chdir($cwd);
         return (bool)$result;
