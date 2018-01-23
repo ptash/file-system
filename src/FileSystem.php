@@ -241,16 +241,16 @@ class FileSystem
         if (!$this->isAbsolutePath($link) && $this->isAbsolutePath($target)) {
             $linkPath = preg_replace("#^\." . $this->dirSeparator . "#", '', $link);
             $linkPath = $target . $this->dirSeparator . $linkPath;
+            $linkPath = $this->normalizePath($linkPath);
         }
         $relativePath = $this->findShortestPath($linkPath, $target);
         chdir(dirname($target));
+        echo "$relativePath <- $linkPath\n";
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
-            echo "$relativePath <- $linkPath\n";
             exec("$command $linkPath $relativePath", $output, $returnVar);
             $result = ($returnVar == 0);
         } else {
-            echo "$relativePath <- $linkPath\n";
             $result = symlink($relativePath, $linkPath);
         }
         chdir($cwd);
