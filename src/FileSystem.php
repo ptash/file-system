@@ -218,8 +218,9 @@ class FileSystem
                 $commonPath = rtrim($commonPath, $this->dirSeparator) . $this->dirSeparator;
                 $sourcePathDepth = substr_count(substr($from, strlen($commonPath)), $this->dirSeparator);
                 $commonPathCode = str_repeat(self::DIRECTORY_UP . $this->dirSeparator, $sourcePathDepth);
-                $commonPathWithCode = $commonPathCode . substr($to, strlen($commonPath));
-                $shortestPath = $this->getCurrentDirectoryForPath() . $commonPathWithCode;
+
+                $shortestPath = ($commonPathCode . substr($to, strlen($commonPath))) ?
+                    : self::DIRECTORY_CURRENT . $this->dirSeparator;
             }
         }
         return $shortestPath;
@@ -237,21 +238,16 @@ class FileSystem
     public function relativeSymlink($target, $link)
     {
         $cwd = getcwd();
-        $linkPath = $link;
-        if (!$this->isAbsolutePath($link) && $this->isAbsolutePath($target)) {
-            $linkPath = preg_replace("#^\." . $this->dirSeparator . "#", '', $link);
-            $linkPath = $target . $this->dirSeparator . $linkPath;
-            $linkPath = $this->normalizePath($linkPath);
-        }
-        $relativePath = $this->findShortestPath($linkPath, $target);
-        chdir(dirname($target));
-        echo "$relativePath <- $linkPath\n";
+
+        $relativePath = $this->findShortestPath($link, $target);
+        chdir(dirname($link));
         if ($this->isOSWindows()) {
             $command = 'mklink /d';
-            exec("$command $linkPath $relativePath", $output, $returnVar);
-            $result = ($returnVar == 0);
+            exec("$command $link $relativePath", $output, $returnVar);
+            $result = $returnVar > 0 ? false : true;
         } else {
-            $result = symlink($relativePath, $linkPath);
+            echo "$relativePath <- $link\n";
+            $result = symlink($relativePath, $link);
         }
         chdir($cwd);
         return (bool)$result;
@@ -265,15 +261,5 @@ class FileSystem
     private function isOSWindows()
     {
         return strtoupper(substr(PHP_OS, 0, strlen('WIN'))) === 'WIN';
-    }
-
-    /**
-     * Get current directory for path.
-     *
-     * @return string
-     */
-    private function getCurrentDirectoryForPath()
-    {
-        return self::DIRECTORY_CURRENT . $this->dirSeparator;
     }
 }
