@@ -144,4 +144,22 @@ class FileSystemTest extends \PHPUnit_Framework_TestCase
             'Check relative link after move'
         );
     }
+
+    /**
+     * Testing relativeSymlink for link.
+     *
+     * @return void
+     */
+    public function testRelativeSymlinkForDir()
+    {
+        $fileSystem = new FileSystem();
+        $dirTest = sys_get_temp_dir() . DIRECTORY_SEPARATOR . __FUNCTION__;
+        $linkDir = $dirTest . DIRECTORY_SEPARATOR . 'test' . DIRECTORY_SEPARATOR;
+        $fileSystem->ensureDirectoryExists($linkDir);
+        $link = $fileSystem->findShortestPath($dirTest, $linkDir . 'link');
+        $fileSystem->relativeSymlink($dirTest, $link);
+        $this->assertTrue(file_exists($linkDir));
+        $fileSystem->emptyDirectory($dirTest);
+        $fileSystem->deleteByPath($dirTest);
+    }
 }
