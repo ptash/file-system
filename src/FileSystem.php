@@ -4,6 +4,8 @@
  * @package GitFixture\Util
  */
 
+declare(strict_types = 0);
+
 namespace Cognitive\FileSystem;
 
 /**
@@ -59,19 +61,40 @@ class FileSystem
      * @param string $file Path to file or directory or link.
      *
      * @return void
+     * @throws FileSystemException Generated on failure.
      */
     public function deleteByPath($file)
     {
-        if (is_link($file)) {
-            if ($this->isOSWindows()) {
-                rmdir($file);
+        set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+            if ($errno === E_WARNING) {
+                throw new FileSystemException(sprintf('%s(%d): %s', $errfile, $errline, $errstr));
             } else {
-                unlink($file);
+                return false;
             }
-        } elseif (is_dir($file)) {
-            rmdir($file);
-        } elseif (is_file($file)) {
-            unlink($file);
+        });
+
+        try {
+            if (is_link($file)) {
+                if ($this->isOSWindows()) {
+                    rmdir($file);
+                } else {
+                    unlink($file);
+                }
+            } elseif (is_dir($file)) {
+                rmdir($file);
+            } elseif (is_file($file)) {
+                if ($this->isOSWindows()) {
+                    $lines = [];
+                    exec(sprintf('DEL /F/Q "%s" 2>&1', $this->normalizePath($file)), $lines, $deleteError);
+                    if ($deleteError) {
+                        throw new FileSystemException("File $file delete error: " . implode(PHP_EOL, $lines));
+                    }
+                } else {
+                    unlink($file);
+                }
+            }
+        } finally {
+            restore_error_handler();
         }
     }
 
