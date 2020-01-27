@@ -285,7 +285,7 @@ class FileSystem
      *
      * @return bool
      */
-    private function isOSWindows()
+    public function isOSWindows()
     {
         return strtoupper(substr(PHP_OS, 0, strlen('WIN'))) === 'WIN';
     }
